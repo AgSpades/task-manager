@@ -37,6 +37,7 @@ func main(){
 		return c.Status(200).JSON(tasks)
 	})
 
+	//method for adding tasks
 	app.Post("/api/tasks",func(c *fiber.Ctx) error{
 		task := &Task{}
 
@@ -56,6 +57,7 @@ func main(){
 
 	})
 
+	//method for marking tasks done
 	app.Patch("api/tasks/:id",func(c*fiber.Ctx) error{
 		id:=c.Params("id")
 
@@ -69,6 +71,24 @@ func main(){
 
 		return c.Status(404).JSON(fiber.Map{"error": "Todo not found"})
 	})
+
+	//method for deleting a task
+	app.Delete("api/tasks/:id",func(c *fiber.Ctx) error{
+		id:=c.Params("id")
+
+		for i, task:=range tasks{
+			if fmt.Sprint(task.ID)==id{
+				tasks= append(tasks[:i], tasks[i+1:]... )
+				
+				return c.Status(200).JSON((fiber.Map{"success":"Deleted task succesfully"}))
+			}
+
+		}
+
+
+		return c.Status(404).JSON((fiber.Map{"error":"Todo with valid id not found"}))
+	})
+
 
 	log.Fatal(app.Listen(":"+PORT))
 }
