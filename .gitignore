@@ -1,3 +1,8 @@
 .vscode
 tmp/
 .env
+node_modules
+
+/bin/
+
+*.out
