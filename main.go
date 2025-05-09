@@ -56,6 +56,19 @@ func main(){
 
 	})
 
+	app.Patch("api/tasks/:id",func(c*fiber.Ctx) error{
+		id:=c.Params("id")
+
+		for i, task:=range tasks{
+			if fmt.Sprint(task.ID)==id{
+				tasks[i].Completed= true
+				return c.Status(200).JSON(tasks[i])
+			}
+
+		}
+
+		return c.Status(404).JSON(fiber.Map{"error": "Todo not found"})
+	})
 
 	log.Fatal(app.Listen(":"+PORT))
 }
