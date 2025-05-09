@@ -15,7 +15,6 @@ type Task struct{
 
 func main(){
 	fmt.Println("Hello again!")
-	//fmt.Println("Test")
 	app:=fiber.New()
 	
 	tasks:= []Task{}
@@ -24,11 +23,15 @@ func main(){
 		return c.Status(200).JSON(fiber.Map{"msg":"Hi from Task Manager"})
 	})
 
+	//method for viewing list of tasks
+	app.Get("/api/tasks",func(c*fiber.Ctx) error{
+		return c.Status(200).JSON(tasks)
+	})
+
 	app.Post("/api/tasks",func(c *fiber.Ctx) error{
 		task := &Task{}
 
-		if err := c.BodyParser(task)
-		err!=nil{
+		if err := c.BodyParser(task);err!=nil{
 			return err
 		}
 
@@ -40,10 +43,7 @@ func main(){
 		task.ID= len(tasks) +1
 		tasks = append(tasks, *task)
 
-		return c.Status(201).JSON(fiber.Map{
-			"msg":"Task has been added succesfully!"})
-
-
+		return c.Status(201).JSON(task)
 
 	})
 
