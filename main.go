@@ -56,7 +56,7 @@ func main(){
 
 	app.Get("/api/tasks", getTasks)
 	app.Post("/api/tasks", createTask)
-	// app.Patch("/api/tasks/:id", updateTask)
+	app.Patch("/api/tasks/:id", updateTask)
 	// app.Delete("/api/tasks/:id", deleteTask)
 
 
@@ -118,5 +118,31 @@ func createTask(c *fiber.Ctx) error {
 
 	return c.Status(201).JSON(task)
 }
-// func updateTask(c *fiber.Ctx) error {}
+func updateTask(c *fiber.Ctx) error {
+	id:=c.Params("id")
+	objectID,err:=primitive.ObjectIDFromHex(id)
+
+	if err!=nil{
+		return c.Status(400).JSON(fiber.Map{
+			"error": "Invalid task ID",
+		})
+	}
+
+
+	filter :=bson.M{"_id":objectID} // filter to find the task
+	// update the task with the given ID
+	update:=bson.M{"$set":bson.M{"completed":true}}
+
+	_,err=collection.UpdateOne(context.Background(),filter,update)
+
+	if err!=nil{
+		return c.Status(500).JSON(fiber.Map{
+			"error": "Failed to update task",
+		})
+	}
+
+	return c.Status(200).JSON(fiber.Map{
+		"success": true,
+	})
+}
 // func deleteTask(c *fiber.Ctx) error {}
