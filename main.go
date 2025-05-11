@@ -8,11 +8,13 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/joho/godotenv"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 type Task struct{
-	ID int `json:"_id" bson:"_id"`
+	ID primitive.ObjectID `json:"_id" bson:"_id"`
 	Completed bool `json:"completed"`
 	Body string `json:"body"`
 }
@@ -36,6 +38,8 @@ func main(){
 		log.Fatal(err)
 	}
 
+	defer client.Disconnect(context.Background())
+
 	err=client.Ping(context.Background(),nil)
 
 	if err!=nil{
@@ -52,8 +56,8 @@ func main(){
 
 	app.Get("/api/tasks", getTasks)
 	app.Post("/api/tasks", createTask)
-	app.Patch("/api/tasks/:id", updateTask)
-	app.Delete("/api/tasks/:id", deleteTask)
+	// app.Patch("/api/tasks/:id", updateTask)
+	// app.Delete("/api/tasks/:id", deleteTask)
 
 
 	PORT := os.Getenv("PORT")
@@ -66,7 +70,53 @@ func main(){
 
 }
 
-func getTasks(c *fiber.Ctx) error {}
-func createTask(c *fiber.Ctx) error {}
-func updateTask(c *fiber.Ctx) error {}
-func deleteTask(c *fiber.Ctx) error {}
+func getTasks(c *fiber.Ctx) error {
+	var tasks []Task
+	cursor, err := collection.Find(context.Background(), bson.M{})
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"error": "Failed to fetch tasks",
+		})
+	}
+
+	defer cursor.Close(context.Background())
+
+	for(cursor.Next(context.Background())){
+		var task Task
+		if err := cursor.Decode(&task); err != nil {
+			return c.Status(500).JSON(fiber.Map{
+				"error": "Failed to decode task",
+			})
+		}
+		tasks = append(tasks, task)
+	}
+
+	return c.JSON(tasks)
+}
+
+func createTask(c *fiber.Ctx) error {
+	task:=new(Task)
+
+	if err:= c.BodyParser(task); err!=nil{
+		log.Fatal(err)
+	}
+
+	if task.Body == ""{
+		return c.Status(400).JSON(fiber.Map{
+			"error": "Task body is required",
+		})
+	}
+
+	result, err := collection.InsertOne(context.Background(), task)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"error": "Failed to create task",
+		})
+	}
+
+	task.ID = result.InsertedID.(primitive.ObjectID)
+
+	return c.Status(201).JSON(task)
+}
+// func updateTask(c *fiber.Ctx) error {}
+// func deleteTask(c *fiber.Ctx) error {}
