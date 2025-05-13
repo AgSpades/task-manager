@@ -44,8 +44,8 @@ const TodoList = () => {
                 </Stack>
             )}
             <Stack gap={3}>
-                {tasks?.map((task, idx) => (
-                    <TodoItem key={idx} todo={task} />
+                {tasks?.map((task) => (
+                    <TodoItem key={task._id} todo={task} />
                 ))}
             </Stack>
         </>
