@@ -1,6 +1,7 @@
 import { Flex, Spinner, Stack, Text } from "@chakra-ui/react";
 import TodoItem from "./TodoItem";
 import { useQuery } from "@tanstack/react-query";
+import { BASE_URL } from "@/App";
 
 export type Task = {
     _id: number;
@@ -13,7 +14,7 @@ const TodoList = () => {
         queryKey: ["tasks"],
         queryFn: async () => {
             try {
-                const response = await fetch("http://localhost:4000/api/tasks")
+                const response = await fetch(BASE_URL + "tasks")
                 const data = await response.json();
 
                 if (!response.ok) {
