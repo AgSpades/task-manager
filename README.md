@@ -14,7 +14,7 @@
 - ✅ Mark tasks as completed
 - ⚡ Real-time updates with TanStack Query
 - 💅 Styled with Chakra UI
-- 🌙 Optional dark mode support *(if applicable)*
+- 🌙 Optional dark mode support 
 
 ---
 
