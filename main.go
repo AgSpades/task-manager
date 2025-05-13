@@ -64,6 +64,7 @@ func main() {
 
 	// endpoints for the API
 
+	app.Get("/api/health", healthCheck)
 	app.Get("/api/tasks", getTasks)
 	app.Post("/api/tasks", createTask)
 	app.Patch("/api/tasks/:id", updateTask)
@@ -81,6 +82,14 @@ func main() {
 
 	log.Fatal(app.Listen(":" + PORT))
 
+}
+
+func healthCheck(c *fiber.Ctx) error {
+
+	return c.Status(200).JSON(fiber.Map{
+		"status":  "UP",
+		"message": "Server is running",
+	})
 }
 
 func getTasks(c *fiber.Ctx) error {
