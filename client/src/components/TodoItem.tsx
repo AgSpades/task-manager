@@ -8,7 +8,7 @@ import { BASE_URL } from "@/App";
 const TodoItem = ({ todo }: { todo: Task }) => {
 	const queryClient = useQueryClient();
 
-	const { mutate: updateTask, isPending: isUpdating } = useMutation({
+	const { mutate: updateTask, isPending: isUpdating } = useMutation<void, Error, void>({
 		mutationKey: ["updateTask"],
 		mutationFn: async () => {
 			try {
@@ -34,7 +34,7 @@ const TodoItem = ({ todo }: { todo: Task }) => {
 		}
 	})
 
-	const { mutate: deleteTask, isPending: isDeleting } = useMutation({
+	const { mutate: deleteTask, isPending: isDeleting } = useMutation<void, Error, void>({
 		mutationKey: ["deleteTask"],
 		mutationFn: async () => {
 			try {
@@ -88,12 +88,12 @@ const TodoItem = ({ todo }: { todo: Task }) => {
 				)}
 			</Flex>
 			<Flex gap={2} alignItems={"center"}>
-				<Box color={"green.500"} cursor={"pointer"} onClick={updateTask}>
+				<Box color={"green.500"} cursor={"pointer"} onClick={() => updateTask(undefined)}>
 					{!isUpdating && <FaCheckCircle size={20} />}
 					{isUpdating && <Spinner size={"sm"} />}
 
 				</Box>
-				<Box color={"red.500"} cursor={"pointer"} onClick={deleteTask}>
+				<Box color={"red.500"} cursor={"pointer"} onClick={() => deleteTask(undefined)}>
 					{!isDeleting && <MdDelete size={20} />}
 					{isDeleting && <Spinner size={"sm"} />}
 				</Box>
