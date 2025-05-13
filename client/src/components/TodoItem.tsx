@@ -34,6 +34,30 @@ const TodoItem = ({ todo }: { todo: Task }) => {
 		}
 	})
 
+	const { mutate: deleteTask, isPending: isDeleting } = useMutation({
+		mutationKey: ["deleteTask"],
+		mutationFn: async () => {
+			try {
+				const response = await fetch(`${BASE_URL}tasks/${todo._id}`, {
+					method: "DELETE",
+					headers: {
+						"Content-Type": "application/json",
+					},
+				});
+				const data = await response.json();
+
+				if (!response.ok) {
+					throw new Error(data.message || "Something went wrong");
+				}
+				return data;
+			} catch (error) {
+				console.error("Error deleting task:", error);
+			}
+		},
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["tasks"] });
+		}
+	})
 
 	return (
 		<Flex gap={2} alignItems={"center"}>
@@ -69,8 +93,9 @@ const TodoItem = ({ todo }: { todo: Task }) => {
 					{isUpdating && <Spinner size={"sm"} />}
 
 				</Box>
-				<Box color={"red.500"} cursor={"pointer"}>
-					<MdDelete size={25} />
+				<Box color={"red.500"} cursor={"pointer"} onClick={deleteTask}>
+					{!isDeleting && <MdDelete size={20} />}
+					{isDeleting && <Spinner size={"sm"} />}
 				</Box>
 			</Flex>
 		</Flex>
