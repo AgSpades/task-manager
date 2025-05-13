@@ -1,31 +1,31 @@
 import { Flex, Spinner, Stack, Text } from "@chakra-ui/react";
-import { useState } from "react";
 import TodoItem from "./TodoItem";
+import { useQuery } from "@tanstack/react-query";
 
+export type Task = {
+    _id: number;
+    body: string;
+    completed: boolean;
+}
 const TodoList = () => {
-    const [isLoading, setIsLoading] = useState(false);
-    const todos = [
-        {
-            _id: 1,
-            body: "Buy groceries",
-            completed: true,
-        },
-        {
-            _id: 2,
-            body: "Walk the dog",
-            completed: false,
-        },
-        {
-            _id: 3,
-            body: "Do laundry",
-            completed: false,
-        },
-        {
-            _id: 4,
-            body: "Cook dinner",
-            completed: true,
-        },
-    ];
+
+    const { data: tasks, isLoading } = useQuery<Task[]>({
+        queryKey: ["tasks"],
+        queryFn: async () => {
+            try {
+                const response = await fetch("http://localhost:4000/api/tasks")
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || "Something went wrong");
+                }
+                return data || [];
+            } catch (error) {
+                console.error("Error fetching tasks:", error);
+                return [];
+            }
+        }
+    })
     return (
         <>
             <Text fontSize={"4xl"} textTransform={"uppercase"} fontWeight={"bold"} textAlign={"center"} my={2}>
@@ -36,17 +36,16 @@ const TodoList = () => {
                     <Spinner size={"xl"} />
                 </Flex>
             )}
-            {!isLoading && todos?.length === 0 && (
+            {!isLoading && tasks?.length === 0 && (
                 <Stack alignItems={"center"} gap='3'>
                     <Text fontSize={"xl"} textAlign={"center"} color={"gray.500"}>
                         All tasks completed! 🤞
                     </Text>
-                    <img src='/go.png' alt='Go logo' width={70} height={70} />
                 </Stack>
             )}
             <Stack gap={3}>
-                {todos?.map((todo) => (
-                    <TodoItem key={todo._id} todo={todo} />
+                {tasks?.map((task, idx) => (
+                    <TodoItem key={idx} todo={task} />
                 ))}
             </Stack>
         </>
